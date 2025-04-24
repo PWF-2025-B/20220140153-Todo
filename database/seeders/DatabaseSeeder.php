@@ -16,19 +16,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Membuat satu user khusus
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $users = User::firstOrCreate([
+            'id' => 1,
+        ],[
+            'name' => 'admin',
+            'email' => 'admin@admin.com',
             'email_verified_at' => now(),
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345678'),
             'remember_token' => Str::random(10),
-            'is_admin' => true
+                //'is_admin' => true
         ]);
 
         
         User::factory(101)->create();
 
         
-        Todo::factory(500)->create();
+        Todo::factory(500)->create([
+            'user_id' => $users -> id
+        ]);
     }
 }
