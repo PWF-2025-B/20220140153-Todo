@@ -52,4 +52,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Todo::class);
     }
+    public function is_admin()
+    {
+        return $this->role === 'admin';
+    }
 }
