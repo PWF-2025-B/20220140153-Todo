@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Todo;
+use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 class TodoController extends Controller
 {
@@ -23,25 +24,29 @@ class TodoController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:25',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         $todo = Todo::create([
             'title' => ucfirst($request->title),
             'user_id' => Auth::id(),
+            'category_id' => $request->category_id,
         ]);
 
         return redirect()->route('todo.index')->with('success', 'Todo created successfully.');
     }
     public function create()
     {
-        return view('todo.create');
+        $categories = Category::where('user_id', Auth::id())->get();
+        return view('todo.create',compact('categories'));
     }
 
     public function edit(Todo $todo)
     {
         // Cek apakah user yang login adalah pemilik todo
         if (auth()->user()->id == $todo->user_id) {
-            return view('todo.edit', compact('todo'));
+            $categories = Category::where('user_id', Auth::id())->get();
+            return view('todo.edit', compact('todo','categories'));
         } else {
             return redirect()->route('todo.index')->with('danger', 'You are not authorized to edit this todo!');
         }
@@ -52,12 +57,13 @@ class TodoController extends Controller
          // Validasi input
          $request->validate([
              'title' => 'required|max:255',
+             'category_id' => 'nullable|exists:categories,id'
          ]);
  
-         // Update todo dengan cara yang lebih rapi
          $todo->update([
-             'title' => ucfirst($request->title),
-         ]);
+            'title' => ucfirst($request->title),
+            'category_id' => $request->category_id,
+        ]);
  
          return redirect()->route('todo.index')->with('success', 'Todo updated successfully!');
      }
